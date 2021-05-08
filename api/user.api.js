@@ -79,17 +79,21 @@ router
             userPassword
         } = req.body;
 
-        const user = new userModel({
+        let user = new userModel({
             userName,
             userLastName,
             userEmail,
             userPhone,
             userPassword: await bCrypt.hash(userPassword, 10),
-        });
+        })
 
         await user
             .save()
-            .then(() => res.status(200).json(user))
+            .then(() => {
+                user = user.toObject();
+                delete user.userPassword;
+                res.status(200).json(user);
+            })
             .catch((err) =>
                 res.status(500).json({
                     error: 'Error with creating new user',
